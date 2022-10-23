@@ -36,3 +36,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 ```
 npx prisma studio
 ```
+
+## How the database is populated
+
+imported CSV file into SQLite database through sqlite studio
