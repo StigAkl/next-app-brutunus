@@ -1,5 +1,4 @@
 import type { NextPage } from 'next'
-import styled from 'styled-components';
 import {
   Box,
   chakra,
@@ -8,7 +7,6 @@ import {
   StatLabel,
   StatNumber,
   useColorModeValue,
-  Heading
 } from '@chakra-ui/react';
 
 interface StatsCardProps {

@@ -38,7 +38,7 @@ interface Filter {
   filter: FilterOptions;
 }
 
-const Employees: NextPage = () => {
+const UserData: NextPage = () => {
   const [filter, setFilter] = useState<Filter>({
     filter: "firstName",
     searchTerm: ""
@@ -160,4 +160,4 @@ const Employees: NextPage = () => {
   )
 }
 
-export default Employees;
+export default UserData;
