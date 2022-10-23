@@ -5,41 +5,43 @@ import { Userdata, PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 interface SearchResponse {
-  count: number;
-  employees: Userdata[];
+  numEntries: number;
+  userdata: Userdata[];
 }
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<SearchResponse>
 ) {
-  const { query, filter } = req.query;
+  const { query } = req;
 
-  const getUserdata = async (query: string, filter: string) => {
-    if (filter === "firstname") {
-      return await prisma.userdata.findMany({
-        where: {
-          firstName: {
-            contains: query?.toString(),
-          },
-        },
-        take: 50,
-      });
-    }
-    return [];
-  };
+  const deafultSearchFilter = "firstName";
+  let filterAttribute = "startsWith";
+
+  let searchTerm: string | number = query.query?.toString() ?? "";
+
+  if (query.filter === "age") {
+    filterAttribute = "equals";
+    searchTerm = parseInt(searchTerm);
+  }
 
   const userdata = await prisma.userdata.findMany({
-    take: 50,
-    orderBy: [
-      {
-        firstName: "asc",
+    where: {
+      [query.filter?.toString() ?? deafultSearchFilter]: {
+        [filterAttribute]: searchTerm,
       },
+    },
+    orderBy: [
+      { firstName: "asc" },
+      { lastName: "asc" },
+      { age: "asc" },
+      { city: "asc" },
+      { street: "asc" },
     ],
   });
 
   res.status(200).json({
-    count: userdata.length,
-    employees: userdata,
+    numEntries: userdata.length,
+    userdata: userdata,
   });
 }

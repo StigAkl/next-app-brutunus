@@ -14,7 +14,6 @@ export default async function handler(
 ) {
   const { page, pagecount } = req.query;
 
-  console.log(pagecount);
   const pageNumber =
     page !== undefined && typeof page === "string" ? parseInt(page) : 1;
 
