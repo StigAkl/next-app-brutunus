@@ -24,7 +24,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 Following API endpoints are available in the app:
 
-# GET
+### GET
 
 [/api/v1/userdata/list?page={1}?pagecount={50}]
 [/api/v1/userdata/list?page={1}?pagecount={50}]
