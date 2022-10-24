@@ -25,7 +25,6 @@ export default async function handler(
     },
   });
 
-  console.log(locations);
   res.status(200).json({
     items: locations.length,
     locations,

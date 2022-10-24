@@ -18,13 +18,13 @@ const Stats: NextPage = () => {
   return (
     <>
       <Box maxW="7xl" mx={'auto'} pt={5} px={{ base: 2, sm: 12, md: 17 }}>
-        <chakra.h1
+        <chakra.h2
           textAlign={'center'}
           fontSize={'4xl'}
           py={10}
           fontWeight={'bold'}>
           Statistics
-        </chakra.h1>
+        </chakra.h2>
         <SimpleGrid columns={{ base: 2, md: 3 }} spacing={{ base: 5, lg: 8 }}>
           <StatsCard title={'We have'} stat={'50,000 employees'} />
           <StatsCard title={'In'} stat={'30 different countries'} />

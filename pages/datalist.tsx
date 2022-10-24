@@ -9,6 +9,7 @@ import styles from "./../styles/Datalist.module.css";
 import { Spinner } from '@chakra-ui/react';
 import { Input } from '@chakra-ui/react'
 import { Heading } from '@chakra-ui/react'
+import Link from 'next/link';
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -31,6 +32,11 @@ export interface UserDataResponse {
   userdata: Userdata
 }
 
+const StyledAnchor = styled.a`
+    text-decoration: underline;
+    cursor: pointer;
+`;
+
 type FilterOptions = "firstName" | "lastName" | "age" | "city";
 
 interface Filter {
@@ -47,7 +53,7 @@ const UserData: NextPage = () => {
   const [page, setPage] = useState(1);
   const [entries, setEntries] = useState(0);
   const [pageCount, setPageCount] = useState(50);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const debounceValue = useDebounce(filter.searchTerm, 500);
 
@@ -60,6 +66,7 @@ const UserData: NextPage = () => {
 
   const nextPage = (e: any) => {
     const page = e.selected;
+
     setPage(page + 1);
   }
 
@@ -73,7 +80,6 @@ const UserData: NextPage = () => {
         data.json().then(data => {
           setUserdata(data.userdata);
           setEntries(data.numEntries);
-          setLoading(false);
         });
       })
     } else {
@@ -91,8 +97,7 @@ const UserData: NextPage = () => {
   const userDataTable = userdata?.map((data, index) => {
     return (
       <Tr key={data.id}>
-        <Td>{index}</Td>
-        <Td> {data.id}</Td>
+        <Td><Link href={`/edit/${data.id}`}><StyledAnchor>{data.id}</StyledAnchor></Link></Td>
         <Td>{data.firstName}</Td>
         <Td>{data.lastName}</Td>
         <Td isNumeric>{data.age}</Td>
@@ -125,13 +130,13 @@ const UserData: NextPage = () => {
         </StyledSearchBar>
       </Stack>
       <TableContainer width={"100%"}>
-        <Heading>Shows {userdata?.length} rows</Heading>
+        {!debounceValue && <Heading>Shows {userdata?.length} rows</Heading>}
+        {debounceValue && <Heading as={"h2"}>{userdata?.length} hits on {debounceValue}</Heading>}
         {userDataTable && (
           <>
             <Table variant='striped' size='sm' colorScheme="teal">
               <Thead>
                 <Tr>
-                  <Th>#</Th>
                   <Th>Id</Th>
                   <Th>First name</Th>
                   <Th>Last name</Th>
@@ -153,8 +158,9 @@ const UserData: NextPage = () => {
         onPageChange={nextPage}
         pageCount={debounceValue ? 1 : entries / pageCount}
         previousLabel="< previous"
-        containerClassName={styles.pagination}
-        activeClassName={styles.active}
+        containerClassName={styles.paginationContainer}
+        activeClassName={styles.paginationActive}
+        pageRangeDisplayed={10}
       />
     </StyledContainer>
   )
