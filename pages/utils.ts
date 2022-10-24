@@ -26,7 +26,7 @@ export interface Errors {
   street: boolean;
   state: boolean;
   ccnumber: boolean;
-  isError: boolean;
+  isError?: boolean;
 }
 
 export const validateCreateForm = (formData: FormData): Errors => {
