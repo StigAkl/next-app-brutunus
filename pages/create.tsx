@@ -51,7 +51,7 @@ const Create: NextPage = () => {
       }).then(res => {
         if (res.status === 204) {
           toast({
-            title: 'User updated',
+            title: 'User created',
             description: "User has been created",
             status: 'success',
             duration: 3000,
