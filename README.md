@@ -49,7 +49,7 @@ Following API endpoints are available in the app:
 /api/v1/userdata/create
 ```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/v1/stats).
+[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/v1/userdata/stats](http://localhost:3000/api/v1/userdata/stats).
 
 The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 
