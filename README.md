@@ -27,11 +27,19 @@ Following API endpoints are available in the app:
 ### GET
 
 ```
-[/api/v1/userdata/list?page={1}?pagecount={50}]()
-[/api/v1/userdata/list?page={1}?pagecount={50}]()
-[/api/v1/userdata/list?page={1}?pagecount={50}]()
-[/api/v1/userdata/list?page={1}?pagecount={50}]()
-[/api/v1/userdata/list?page={1}?pagecount={50}]()
+/api/v1/userdata/list?page={1}?pagecount={50}
+/api/v1/userdata/stats
+/api/v1/userdata/{userId}
+/api/v1/userdata/locations
+/api/v1/userdata/search?filter=['firstName' | 'lastName' | 'age' | 'city']&query=text
+```
+
+### POST
+
+```
+/api/v1/userdata/update
+/api/v1/userdata/remove
+/api/v1/userdata/create
 ```
 
 [API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
