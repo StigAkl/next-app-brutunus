@@ -29,19 +29,19 @@ const queryClient = new QueryClient({
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <LoadScript
+    /*<LoadScript
       googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ""}
       libraries={libs}
-    >
-      <ChakraProvider>
-        <GlobalStyle />
-        <QueryClientProvider client={queryClient}>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        </QueryClientProvider>
-      </ChakraProvider>
-    </LoadScript>
+    >*/
+    <ChakraProvider>
+      <GlobalStyle />
+      <QueryClientProvider client={queryClient}>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </QueryClientProvider>
+    </ChakraProvider>
+    /*</LoadScript>*/
   )
 }
 

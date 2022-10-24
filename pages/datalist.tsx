@@ -1,15 +1,15 @@
 import type { NextPage } from 'next'
 import styled from 'styled-components';
-import { Select, Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { Select, Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr, CloseButton } from '@chakra-ui/react';
 import useDebounce from '../hooks/UseDebounce';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { Userdata } from '@prisma/client';
 import ReactPaginate from 'react-paginate';
 import styles from "./../styles/Datalist.module.css";
-import { Spinner } from '@chakra-ui/react';
 import { Input } from '@chakra-ui/react'
 import { Heading } from '@chakra-ui/react'
 import Link from 'next/link';
+import debounce from 'lodash.debounce'
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -53,9 +53,29 @@ const UserData: NextPage = () => {
   const [page, setPage] = useState(1);
   const [entries, setEntries] = useState(0);
   const [pageCount, setPageCount] = useState(50);
-  const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState("");
 
   const debounceValue = useDebounce(filter.searchTerm, 500);
+
+  const changeHandler = (filter: FilterOptions, searchTerm: string) => {
+    let url = `/api/v1/userdata/search?query=${searchTerm}&filter=${filter}`
+    if (searchTerm === "") {
+      url = `/api/v1/userdata/list?page=${page}&pagecount=${pageCount}`
+      setQuery("");
+    } else {
+      setQuery(searchTerm);
+    }
+    fetch(url).then(data => {
+      data.json().then(data => {
+        setUserdata(data.userdata);
+        setEntries(data.numEntries);
+      })
+    })
+  }
+
+  const debouncedChangeHandler = useCallback(
+    debounce(changeHandler, 300), []
+  );
 
   const handleSearchChange = (filter: FilterOptions, searchTerm: string) => {
     setFilter({
@@ -74,25 +94,35 @@ const UserData: NextPage = () => {
     setPageCount(parseInt(e.target.value));
   }
 
-  useEffect(() => {
-    if (debounceValue === "") {
-      fetch(`/api/v1/userdata/list?page=${page}&pagecount=${pageCount}`).then(data => {
-        data.json().then(data => {
-          setUserdata(data.userdata);
-          setEntries(data.numEntries);
-        });
-      })
-    } else {
-      fetch(`/api/v1/userdata/search?query=${debounceValue}&filter=${filter.filter}`).then(data => {
-        data.json().then(data => {
-          setUserdata(data.userdata);
-          setEntries(data.numEntries);
+  const remove = (id: number) => {
+    const parsedId = id;
+    fetch('/api/v1/userdata/remove', {
+      body: JSON.stringify({
+        id: parsedId
+      }),
+      method: "POST",
+      headers: {
+        'content-type': 'application/json'
+      }
+    }).then(res => {
+      if (res.status === 200) {
+        setUserdata(previousData => {
+          return previousData?.filter(x => x.id !== parsedId);
         })
-      })
-    }
+      }
+    })
+  }
+
+  useEffect(() => {
+    fetch(`/api/v1/userdata/list?page=${page}&pagecount=${pageCount}`).then(data => {
+      data.json().then(data => {
+        setUserdata(data.userdata);
+        setEntries(data.numEntries);
+      });
+    })
     //Workaround: Filter er ikke inkludert i dependency listen da den skaper lag i frontend klienten grunnet trigging av refetch for hver onchange 
     //Fix: filter burde returneres fra debounce hooken istedenfor - et problem for fremtidige meg
-  }, [page, pageCount, debounceValue])
+  }, [page, pageCount])
 
   const userDataTable = userdata?.map((data, index) => {
     return (
@@ -104,22 +134,19 @@ const UserData: NextPage = () => {
         <Td>{data.street}</Td>
         <Td>{data.city}</Td>
         <Td>{data.ccnumber}</Td>
+        <Td><CloseButton onClick={() => remove(data.id)} /></Td>
       </Tr >
     )
   });
-
-  if (loading) {
-    return <Spinner />
-  }
 
   return (
     <StyledContainer>
       <Stack spacing={3}>
         <StyledSearchBar>
-          <Input variant='outline' placeholder='Firstname' onChange={(e) => handleSearchChange("firstName", e.target.value)} />
-          <Input variant='outline' placeholder='Last name' onChange={(e) => handleSearchChange("lastName", e.target.value)} />
-          <Input variant='outline' placeholder='Age' onChange={(e) => handleSearchChange("age", e.target.value)} />
-          <Input variant='outline' placeholder='City' onChange={(e) => handleSearchChange("city", e.target.value)} />
+          <Input variant='outline' placeholder='Firstname' onChange={(e) => debouncedChangeHandler("firstName", e.target.value)} />
+          <Input variant='outline' placeholder='Last name' onChange={(e) => debouncedChangeHandler("lastName", e.target.value)} />
+          <Input variant='outline' placeholder='Age' onChange={(e) => debouncedChangeHandler("age", e.target.value)} />
+          <Input variant='outline' placeholder='City' onChange={(e) => debouncedChangeHandler("city", e.target.value)} />
         </StyledSearchBar>
         <StyledSearchBar>
           {!debounceValue && (<Select onChange={pageCountChange} size='md'>
@@ -130,8 +157,8 @@ const UserData: NextPage = () => {
         </StyledSearchBar>
       </Stack>
       <TableContainer width={"100%"}>
-        {!debounceValue && <Heading>Shows {userdata?.length} rows</Heading>}
-        {debounceValue && <Heading as={"h2"}>{userdata?.length} hits on {debounceValue}</Heading>}
+        {!query && <Heading as="h3">Shows {userdata?.length} rows</Heading>}
+        {query && <Heading as="h2">{userdata?.length} hits on {query}</Heading>}
         {userDataTable && (
           <>
             <Table variant='striped' size='sm' colorScheme="teal">
@@ -144,6 +171,7 @@ const UserData: NextPage = () => {
                   <Th>Street</Th>
                   <Th>City</Th>
                   <Th>ccnumber</Th>
+                  <Th>Delete</Th>
                 </Tr>
               </Thead>
               <Tbody>

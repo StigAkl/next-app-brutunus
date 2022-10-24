@@ -25,7 +25,6 @@ const Edit: NextPage = () => {
   const [street, setStreet] = useState("");
   const [ccnumber, setCcnumber] = useState("");
   const [state, setState] = useState("");
-  const [statusText, setStatusText] = useState("");
 
   const { data, isLoading } = useUser(id?.toString());
   const queryClient = useQueryClient();
