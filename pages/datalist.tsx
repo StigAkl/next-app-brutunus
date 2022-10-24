@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import styled from 'styled-components';
-import { Select, Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr, CloseButton } from '@chakra-ui/react';
+import { Select, Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr, CloseButton, Text } from '@chakra-ui/react';
 import useDebounce from '../hooks/UseDebounce';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { Userdata } from '@prisma/client';
@@ -55,34 +55,26 @@ const UserData: NextPage = () => {
   const [pageCount, setPageCount] = useState(50);
   const [query, setQuery] = useState("");
 
-  const debounceValue = useDebounce(filter.searchTerm, 500);
-
   const changeHandler = (filter: FilterOptions, searchTerm: string) => {
     let url = `/api/v1/userdata/search?query=${searchTerm}&filter=${filter}`
     if (searchTerm === "") {
-      url = `/api/v1/userdata/list?page=${page}&pagecount=${pageCount}`
       setQuery("");
     } else {
       setQuery(searchTerm);
-    }
-    fetch(url).then(data => {
-      data.json().then(data => {
-        setUserdata(data.userdata);
-        setEntries(data.numEntries);
+      fetch(url).then(data => {
+        data.json().then(data => {
+          setUserdata(data.userdata);
+          setEntries(data.numEntries);
+        })
       })
-    })
+    }
+
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedChangeHandler = useCallback(
     debounce(changeHandler, 300), []
   );
-
-  const handleSearchChange = (filter: FilterOptions, searchTerm: string) => {
-    setFilter({
-      filter: filter,
-      searchTerm: searchTerm
-    });
-  }
 
   const nextPage = (e: any) => {
     const page = e.selected;
@@ -114,33 +106,36 @@ const UserData: NextPage = () => {
   }
 
   useEffect(() => {
-    fetch(`/api/v1/userdata/list?page=${page}&pagecount=${pageCount}`).then(data => {
-      data.json().then(data => {
-        setUserdata(data.userdata);
-        setEntries(data.numEntries);
-      });
-    })
+    if (!query) {
+      fetch(`/api/v1/userdata/list?page=${page}&pagecount=${pageCount}`).then(data => {
+        data.json().then(data => {
+          setUserdata(data.userdata);
+          setEntries(data.numEntries);
+        });
+      })
+    }
     //Workaround: Filter er ikke inkludert i dependency listen da den skaper lag i frontend klienten grunnet trigging av refetch for hver onchange 
     //Fix: filter burde returneres fra debounce hooken istedenfor - et problem for fremtidige meg
-  }, [page, pageCount])
+  }, [page, pageCount, query])
 
   const userDataTable = userdata?.map((data, index) => {
     return (
       <Tr key={data.id}>
-        <Td><Link href={`/edit/${data.id}`}><StyledAnchor>{data.id}</StyledAnchor></Link></Td>
+        <Link href={`/edit/${data.id}`}><Td><StyledAnchor>{data.id}</StyledAnchor></Td></Link>
         <Td>{data.firstName}</Td>
         <Td>{data.lastName}</Td>
         <Td isNumeric>{data.age}</Td>
         <Td>{data.street}</Td>
         <Td>{data.city}</Td>
         <Td>{data.ccnumber}</Td>
-        <Td><CloseButton onClick={() => remove(data.id)} /></Td>
+        <Td><CloseButton color='red.600' onClick={() => remove(data.id)} /></Td>
       </Tr >
     )
   });
 
   return (
     <StyledContainer>
+      <Text size="lg" marginBottom="10px">Search to filter</Text>
       <Stack spacing={3}>
         <StyledSearchBar>
           <Input variant='outline' placeholder='Firstname' onChange={(e) => debouncedChangeHandler("firstName", e.target.value)} />
@@ -149,16 +144,17 @@ const UserData: NextPage = () => {
           <Input variant='outline' placeholder='City' onChange={(e) => debouncedChangeHandler("city", e.target.value)} />
         </StyledSearchBar>
         <StyledSearchBar>
-          {!debounceValue && (<Select onChange={pageCountChange} size='md'>
+          {!query && (<Select onChange={pageCountChange} size='md'>
             <option value="50">50 per page</option>
             <option value="100">100 per page</option>
             <option value="200">200 per page</option>
           </Select>)}
         </StyledSearchBar>
       </Stack>
-      <TableContainer width={"100%"}>
-        {!query && <Heading as="h3">Shows {userdata?.length} rows</Heading>}
+      <TableContainer marginTop="30px" width={"100%"}>
+        {!query && <Heading size="md" >Shows {userdata?.length} rows per page</Heading>}
         {query && <Heading as="h2">{userdata?.length} hits on {query}</Heading>}
+        <Text fontSize='sm'>Click on id to edit</Text>
         {userDataTable && (
           <>
             <Table variant='striped' size='sm' colorScheme="teal">
@@ -184,11 +180,11 @@ const UserData: NextPage = () => {
       <ReactPaginate
         nextLabel="next >"
         onPageChange={nextPage}
-        pageCount={debounceValue ? 1 : entries / pageCount}
+        pageCount={query ? 1 : entries / pageCount}
         previousLabel="< previous"
         containerClassName={styles.paginationContainer}
         activeClassName={styles.paginationActive}
-        pageRangeDisplayed={10}
+        pageRangeDisplayed={4}
       />
     </StyledContainer>
   )
