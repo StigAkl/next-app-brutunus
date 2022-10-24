@@ -1,7 +1,6 @@
 import type { NextPage } from 'next'
 import styled from 'styled-components';
 import { Select, Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr, CloseButton, Text } from '@chakra-ui/react';
-import useDebounce from '../hooks/UseDebounce';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { Userdata } from '@prisma/client';
 import ReactPaginate from 'react-paginate';
