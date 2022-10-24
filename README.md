@@ -9,7 +9,7 @@ Prisma, whic is an open-source ORM for Node.js and TypeScript, is used as the da
 
 This app is made to edit, add, remove, search and filter data found in datasett.csv json, as well as presenting some overall statistics about the data. It also creates a heatmap using google maps API based on the geo locations found in the dataset, but this needs some optimization and is currently disabled as it requires a google API key.
 
-Enable it by uncommenting the <LoadScript> tag in \_app.tsx and visit [http://localhost:3000/map](http://localhost/map)
+Enable it by uncommenting the <LoadScript> tag in \_app.tsx, add your own google API key and visit [http://localhost:3000/map](http://localhost/map). Then you need to toggle the heatmap after data has loaded.
 
 ## How to run
 
