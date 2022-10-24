@@ -16,19 +16,20 @@ export default async function handler(
   const { query } = req;
 
   const deafultSearchFilter = "firstName";
-  let filterAttribute = "startsWith";
+  let filterOperator = "startsWith";
 
   let searchTerm: string | number = query.query?.toString() ?? "";
 
   if (query.filter === "age") {
-    filterAttribute = "equals";
+    filterOperator = "equals";
     searchTerm = parseInt(searchTerm);
   }
 
   const userdata = await prisma.userdata.findMany({
+    take: 3000,
     where: {
       [query.filter?.toString() ?? deafultSearchFilter]: {
-        [filterAttribute]: searchTerm,
+        [filterOperator]: searchTerm,
       },
     },
     orderBy: [

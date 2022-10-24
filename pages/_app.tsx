@@ -5,6 +5,30 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import Layout from '../components/layout';
 import { LoadScript } from '@react-google-maps/api';
 import { libs } from './utils';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  ArcElement
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  ArcElement
+)
 
 const GlobalStyle = createGlobalStyle`
   *,

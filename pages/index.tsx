@@ -2,60 +2,90 @@ import type { NextPage } from 'next'
 import {
   Box,
   chakra,
+  Container,
+  Heading,
   SimpleGrid,
-  Stat,
-  StatLabel,
-  StatNumber,
-  useColorModeValue,
+  Spinner,
+  styled,
 } from '@chakra-ui/react';
+import AgeChart from '../components/AgeChart';
+import { useEffect, useState } from 'react';
 
-interface StatsCardProps {
-  title: string;
-  stat: string;
+export interface Stats {
+  userDataCount: number;
+  averageAge?: number;
+  statsCount: number;
+  citiesCount: number;
+  topTenCities: string[];
+  ageRangeStats: AgeStats[];
 }
 
+export interface AgeStats {
+  label: string;
+  count: number;
+}
+
+const initStats = {
+  userDataCount: 0,
+  averageAge: 0,
+  statsCount: 0,
+  citiesCount: 0,
+  topTenCities: [],
+  ageRangeStats: [],
+}
+
+
 const Stats: NextPage = () => {
+
+  const [stats, setStats] = useState<Stats>(initStats);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    fetch('/api/v1/userdata/stats').then(res => {
+      if (res.status === 200) {
+        res.json().then(data => {
+          setStats(data);
+          setLoading(false);
+        })
+      }
+    })
+  }, [])
+
+
+  if (loading) {
+    return (
+      <Container centerContent>
+        <Spinner marginTop="50px" />
+      </Container>
+    )
+  }
   return (
     <>
       <Box maxW="7xl" mx={'auto'} pt={5} px={{ base: 2, sm: 12, md: 17 }}>
-        <chakra.h2
+        <Heading
           textAlign={'center'}
-          fontSize={'4xl'}
-          py={10}
-          fontWeight={'bold'}>
+          as="h1"
+          margin="40px">
           Statistics
-        </chakra.h2>
+        </Heading>
         <SimpleGrid columns={{ base: 2, md: 3 }} spacing={{ base: 5, lg: 8 }}>
-          <StatsCard title={'We have'} stat={'50,000 employees'} />
-          <StatsCard title={'In'} stat={'30 different countries'} />
-          <StatsCard title={'Who speak'} stat={'100 different languages'} />
-          <StatsCard title={'Who speak'} stat={'100 different languages'} />
-          <StatsCard title={'Who speak'} stat={'100 different languages'} />
-          <StatsCard title={'Who speak'} stat={'100 different languages'} />
+          <Box maxW='sm' borderWidth='1px' borderRadius='lg' overflow='hidden'>
+            <Heading textAlign="center" padding="5px" as="h2" size="lg" >Age groups</Heading>
+            <AgeChart stats={stats.ageRangeStats} />
+          </Box>
+          <Box maxW='sm' borderWidth='1px' alignItems="center" borderRadius='lg' overflow='hidden'>
+            <Heading textAlign="center" padding="5px" size="lg" as="h2">Data records</Heading>
+            <Box marginTop="10px" border="1px solid black" height="100%" display="flex" justifyContent="center" alignItems="center">
+              Test
+            </Box>
+          </Box>
+          <Box maxW='sm' borderWidth='1px' borderRadius='lg' overflow='hidden'>
+            {/* <AgeChart stats={stats.ageRangeStats} /> */}
+          </Box>
         </SimpleGrid>
       </Box>
     </>
   )
-}
-
-function StatsCard(props: StatsCardProps) {
-  const { title, stat } = props;
-  return (
-    <Stat
-      px={{ base: 4, md: 8 }}
-      py={'5'}
-      shadow={'xl'}
-      border={'1px solid'}
-      borderColor={useColorModeValue('gray.800', 'gray.500')}
-      rounded={'lg'}>
-      <StatLabel fontWeight={'medium'}>
-        {title}
-      </StatLabel>
-      <StatNumber fontSize={'2xl'} fontWeight={'medium'}>
-        {stat}
-      </StatNumber>
-    </Stat>
-  );
 }
 
 

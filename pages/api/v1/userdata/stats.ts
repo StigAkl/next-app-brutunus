@@ -8,9 +8,42 @@ interface Stats {
   statsCount: number;
   citiesCount: number;
   topTenCities: string[];
+  ageRangeStats: AgeStats[];
+}
+
+interface AgeStats {
+  label: string;
+  count: number;
 }
 
 const prisma = new PrismaClient();
+
+const ageStats = [
+  {
+    label: "12-18",
+    count: 0,
+  },
+  {
+    label: "19-25",
+    count: 0,
+  },
+  {
+    label: "26-35",
+    count: 0,
+  },
+  {
+    label: "36-51",
+    count: 0,
+  },
+  {
+    label: "52-69",
+    count: 0,
+  },
+  {
+    label: "70+",
+    count: 0,
+  },
+];
 
 export default async function handler(
   req: NextApiRequest,
@@ -25,7 +58,7 @@ export default async function handler(
     },
   });
 
-  const countByCities = await prisma.userdata.groupBy({
+  const countByCitiesPromise = prisma.userdata.groupBy({
     take: 10,
     by: ["city"],
     _count: {
@@ -38,19 +71,43 @@ export default async function handler(
     },
   });
 
-  const numUniqueCities = (
-    await prisma.userdata.findMany({
-      distinct: ["city"],
-    })
-  ).length;
+  const ageStatsTransactionPromise = prisma.$transaction([
+    prisma.userdata.count({
+      where: { age: { gte: 12, lte: 18 } },
+    }),
+    prisma.userdata.count({
+      where: { age: { gte: 19, lte: 25 } },
+    }),
+    prisma.userdata.count({
+      where: { age: { gte: 26, lte: 35 } },
+    }),
+    prisma.userdata.count({
+      where: { age: { gte: 36, lte: 51 } },
+    }),
+    prisma.userdata.count({
+      where: { age: { gte: 52, lte: 69 } },
+    }),
+    prisma.userdata.count({
+      where: { age: { gte: 70 } },
+    }),
+  ]);
 
-  console.log("By cities:", countByCities);
-
-  const topTenCities = countByCities.map((city) => {
-    return city.city;
+  const numUniqueCitiesPromise = prisma.userdata.findMany({
+    distinct: ["city"],
   });
 
-  console.log(topTenCities);
+  //Retrieve results from promises
+  const topTenCities = (await countByCitiesPromise).map((city) => {
+    return city.city;
+  });
+  const numUniqueCities = (await numUniqueCitiesPromise).length;
+  const ageStatsTransactionResult = await ageStatsTransactionPromise;
+
+  ageStats.forEach((stat, index) => {
+    stat.count = ageStatsTransactionResult[index];
+  });
+
+  await prisma.$disconnect();
 
   res.status(200).json({
     userDataCount: aggregation._count._all,
@@ -58,5 +115,6 @@ export default async function handler(
     citiesCount: numUniqueCities,
     statsCount: 10,
     topTenCities,
+    ageRangeStats: ageStats,
   });
 }
