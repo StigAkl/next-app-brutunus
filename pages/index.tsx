@@ -4,20 +4,25 @@ import {
   chakra,
   Container,
   Heading,
+  List,
+  ListItem,
   SimpleGrid,
   Spinner,
   styled,
+  Text,
 } from '@chakra-ui/react';
 import AgeChart from '../components/AgeChart';
 import { useEffect, useState } from 'react';
+import Card, { StatsCardProps } from '../components/Cards';
 
 export interface Stats {
   userDataCount: number;
   averageAge?: number;
-  statsCount: number;
   citiesCount: number;
   topTenCities: string[];
   ageRangeStats: AgeStats[];
+  statesCount: number,
+  topTenStates: string[];
 }
 
 export interface AgeStats {
@@ -28,10 +33,11 @@ export interface AgeStats {
 const initStats = {
   userDataCount: 0,
   averageAge: 0,
-  statsCount: 0,
   citiesCount: 0,
   topTenCities: [],
   ageRangeStats: [],
+  statesCount: 0,
+  topTenStates: [],
 }
 
 
@@ -39,6 +45,22 @@ const Stats: NextPage = () => {
 
   const [stats, setStats] = useState<Stats>(initStats);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const overviewStats: StatsCardProps = {
+    title: "Statistics",
+    col1: {
+      title: "Users",
+      value: stats.userDataCount.toString()
+    },
+    col2: {
+      title: "Cities",
+      value: stats.citiesCount.toString()
+    },
+    col3: {
+      title: "States",
+      value: stats.statesCount.toString()
+    }
+  }
 
   useEffect(() => {
     fetch('/api/v1/userdata/stats').then(res => {
@@ -59,31 +81,44 @@ const Stats: NextPage = () => {
       </Container>
     )
   }
+
+  const topCities = stats.topTenCities.map((city, i) => (<ListItem key={city}>{i + 1}. {city}</ListItem>));
+  const topStates = stats.topTenStates.map((state, i) => (<ListItem key={state}>{i + 1} {state}</ListItem>));
+
   return (
     <>
-      <Box maxW="7xl" mx={'auto'} pt={5} px={{ base: 2, sm: 12, md: 17 }}>
+      <Container color="teal.600" display="flex" justifyContent="center" alignItems="center" flexDirection="column">
         <Heading
           textAlign={'center'}
           as="h1"
           margin="40px">
           Statistics
         </Heading>
-        <SimpleGrid columns={{ base: 2, md: 3 }} spacing={{ base: 5, lg: 8 }}>
-          <Box maxW='sm' borderWidth='1px' borderRadius='lg' overflow='hidden'>
-            <Heading textAlign="center" padding="5px" as="h2" size="lg" >Age groups</Heading>
-            <AgeChart stats={stats.ageRangeStats} />
-          </Box>
-          <Box maxW='sm' borderWidth='1px' alignItems="center" borderRadius='lg' overflow='hidden'>
-            <Heading textAlign="center" padding="5px" size="lg" as="h2">Data records</Heading>
-            <Box marginTop="10px" border="1px solid black" height="100%" display="flex" justifyContent="center" alignItems="center">
-              Test
-            </Box>
-          </Box>
-          <Box maxW='sm' borderWidth='1px' borderRadius='lg' overflow='hidden'>
-            {/* <AgeChart stats={stats.ageRangeStats} /> */}
-          </Box>
-        </SimpleGrid>
-      </Box>
+
+        <Text fontWeight="bold" textAlign="center" padding="15px" as="h2" size="lg" >Records of <Text display="inline" color="red.400">{stats.userDataCount}</Text> users</Text>
+
+        <Box maxW='sm' overflow='hidden'>
+          <Card {...overviewStats} />
+        </Box>
+        <Box boxSize="2xl" marginBottom="100px">
+          <Heading textAlign="center" padding="15px" as="h2" size="lg" >Age groups</Heading>
+          <AgeChart stats={stats.ageRangeStats} />
+        </Box>
+
+        <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" marginBottom="50px">
+          <Heading textAlign="center" padding="5px" size="lg" as="h2">Top 10 cities</Heading>
+          <List>
+            {topCities}
+          </List>
+        </Box>
+
+        <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center" marginBottom="100px">
+          <Heading textAlign="center" padding="5px" size="lg" as="h2">Top 10 states</Heading>
+          <List>
+            {topStates}
+          </List>
+        </Box>
+      </Container>
     </>
   )
 }

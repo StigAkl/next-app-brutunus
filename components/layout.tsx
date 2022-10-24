@@ -1,3 +1,4 @@
+import Head from "next/head";
 import NavBar from "./NavBar";
 
 type Props = {
@@ -7,6 +8,9 @@ type Props = {
 export default function Layout({ children }: Props) {
   return (
     <>
+      <Head>
+        <title>Brutunus</title>
+      </Head>
       <NavBar />
       <main>{children}</main>
     </>

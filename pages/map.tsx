@@ -1,5 +1,5 @@
 import { NextPage } from "next";
-import GMap from "../components/GMap/";
+import GMap from "../components/GMap/GMap";
 
 
 const Map: NextPage = () => {

@@ -9,8 +9,8 @@ const containerStyle = {
 };
 
 const center = {
-  lat: -24.72204,
-  lng: 83.54313
+  lat: 49.68584175026672,
+  lng: 13.359960107720635
 };
 
 export interface Location {
@@ -42,17 +42,15 @@ const GMap = () => {
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}
-        zoom={2}
+        zoom={10}
       >
         {
           (heatmap && <HeatmapLayer
             data={locations}
             options={
               {
+                opacity: 0.3,
                 maxIntensity: 1,
-                radius: 3,
-                dissipating: true,
-                opacity: 0.3
               }
             }
           />)

@@ -9,6 +9,7 @@ import { Input } from '@chakra-ui/react'
 import { Heading } from '@chakra-ui/react'
 import Link from 'next/link';
 import debounce from 'lodash.debounce'
+import { SearchIcon } from '@chakra-ui/icons';
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -134,7 +135,7 @@ const UserData: NextPage = () => {
 
   return (
     <StyledContainer>
-      <Text size="lg" marginBottom="10px">Search to filter</Text>
+      <Text size="lg" marginBottom="10px"><SearchIcon marginRight="10px" />Search and filter in this beautiful dataset</Text>
       <Stack spacing={3}>
         <StyledSearchBar>
           <Input variant='outline' placeholder='Firstname' onChange={(e) => debouncedChangeHandler("firstName", e.target.value)} />

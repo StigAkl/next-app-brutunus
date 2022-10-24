@@ -52,11 +52,12 @@ const queryClient = new QueryClient({
 })
 
 function MyApp({ Component, pageProps }: AppProps) {
+  //LoadScript is used for heatmap - disabled as it requires google api key
   return (
-    /*<LoadScript
-      googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ""}
-      libraries={libs}
-    >*/
+    // <LoadScript
+    //   googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ""}
+    //   libraries={libs}
+    // >
     <ChakraProvider>
       <GlobalStyle />
       <QueryClientProvider client={queryClient}>
@@ -65,7 +66,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         </Layout>
       </QueryClientProvider>
     </ChakraProvider>
-    /*</LoadScript>*/
+    /* </LoadScript> */
   )
 }
 

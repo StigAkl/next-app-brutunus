@@ -5,10 +5,11 @@ import { PrismaClient } from "@prisma/client";
 interface Stats {
   userDataCount: number;
   averageAge?: number;
-  statsCount: number;
   citiesCount: number;
   topTenCities: string[];
+  topTenStates: string[];
   ageRangeStats: AgeStats[];
+  statesCount: number;
 }
 
 interface AgeStats {
@@ -19,30 +20,12 @@ interface AgeStats {
 const prisma = new PrismaClient();
 
 const ageStats = [
-  {
-    label: "12-18",
-    count: 0,
-  },
-  {
-    label: "19-25",
-    count: 0,
-  },
-  {
-    label: "26-35",
-    count: 0,
-  },
-  {
-    label: "36-51",
-    count: 0,
-  },
-  {
-    label: "52-69",
-    count: 0,
-  },
-  {
-    label: "70+",
-    count: 0,
-  },
+  { label: "12-18", count: 0 },
+  { label: "19-25", count: 0 },
+  { label: "26-35", count: 0 },
+  { label: "36-51", count: 0 },
+  { label: "52-69", count: 0 },
+  { label: "70+", count: 0 },
 ];
 
 export default async function handler(
@@ -69,6 +52,23 @@ export default async function handler(
         city: "desc",
       },
     },
+  });
+
+  const countByStatesPromise = prisma.userdata.groupBy({
+    take: 10,
+    by: ["state"],
+    _count: {
+      city: true,
+    },
+    orderBy: {
+      _count: {
+        city: "desc",
+      },
+    },
+  });
+
+  const statesCountPromise = prisma.userdata.findMany({
+    distinct: ["state"],
   });
 
   const ageStatsTransactionPromise = prisma.$transaction([
@@ -100,8 +100,11 @@ export default async function handler(
   const topTenCities = (await countByCitiesPromise).map((city) => {
     return city.city;
   });
+
   const numUniqueCities = (await numUniqueCitiesPromise).length;
   const ageStatsTransactionResult = await ageStatsTransactionPromise;
+  const numUniqueStates = (await statesCountPromise).length;
+  const topTenStates = (await countByStatesPromise).map((state) => state.state);
 
   ageStats.forEach((stat, index) => {
     stat.count = ageStatsTransactionResult[index];
@@ -113,8 +116,9 @@ export default async function handler(
     userDataCount: aggregation._count._all,
     averageAge: aggregation._avg.age ?? 0,
     citiesCount: numUniqueCities,
-    statsCount: 10,
     topTenCities,
     ageRangeStats: ageStats,
+    statesCount: numUniqueStates,
+    topTenStates,
   });
 }
